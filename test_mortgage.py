@@ -5,7 +5,7 @@ from mortgage import monthly_payment, total_payment, overpayment
 def test_monthly_payment_basic():
     # 1 000 000 под 12% на 1 год — примерно 88 848.79
     result = monthly_payment(1_000_000, 12, 1)
-    assert result == pytest.approx(8848.79, rel=0.01)
+    assert result == pytest.approx(88848.79, rel=0.01)
 
 
 def test_monthly_payment_longer_term():
