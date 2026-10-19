@@ -25,7 +25,7 @@ def overpayment(principal, annual_rate, years):
 
 
 if __name__ == "__main__":
-    print("=== Ипотечный калькулятор ===")
+    print("=== Ипотечный калькулятор")
     try:
         principal = float(input("Введите сумму кредита (руб.): "))
         annual_rate = float(input("Введите годовую ставку (например, 12): "))
