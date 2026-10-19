@@ -23,6 +23,7 @@ def overpayment(principal, annual_rate, years):
     """Переплата по процентам."""
     return round(total_payment(principal, annual_rate, years) - principal, 2)
 
+
 if __name__ == "__main__":
     print("=== Ипотечный калькулятор ===")
     try:
@@ -39,5 +40,6 @@ if __name__ == "__main__":
         print(f"Общая сумма выплат: {t_pay:,.2f} руб.")
         print(f"Переплата по процентам: {over:,.2f} руб.")
         print("-" * 40)
+
     except ValueError:
         print("Ошибка: пожалуйста, вводите только числа.")

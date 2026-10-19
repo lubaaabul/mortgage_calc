@@ -1,34 +1,60 @@
-name: CI/CD Pipeline
+name: Full CI/CD Pipeline
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  test:
+  lint:
     runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Run Flake8 Linter
+        run: |
+          echo "Проверка кода линтером..."
+          python3 -m venv .venv_lint
+          source .venv_lint/bin/activate
+          pip install flake8
+          flake8 mortgage.py test_mortgage.py --max-line-length=120
+          deactivate
+          rm -rf .venv_lint
 
+  test:
+    needs: lint
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install dependencies and run tests
         run: |
           echo "Запуск тестов..."
           python3 -m venv .venv_test
           source .venv_test/bin/activate
-          pip install --quiet --upgrade pip
-          pip install --quiet -r requirements.txt
+          pip install -r requirements.txt
           pytest -v
           deactivate
           rm -rf .venv_test
 
-  deploy:
+  build_docker:
     needs: test
     runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: |
+          echo "Сборка Docker образа..."
+          docker build -t mortgage-calculator:latest .
+          echo "Готовые образы:"
+          docker images | grep mortgage-calculator
 
+  deploy:
+    needs: build_docker 
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Deploy to Prod Server
         run: |
           echo "Разворачиваем приложение..."
@@ -36,5 +62,6 @@ jobs:
           mkdir -p $DEPLOY_DIR
           cp mortgage.py $DEPLOY_DIR/
           cp requirements.txt $DEPLOY_DIR/
+          cp Dockerfile $DEPLOY_DIR/
           echo "Деплой завершён в $(date)" > $DEPLOY_DIR/last_deploy.txt
           ls -la $DEPLOY_DIR
