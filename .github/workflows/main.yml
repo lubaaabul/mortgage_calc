@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies and run tests
+        run: |
+          echo "Запуск тестов..."
+          python3 -m venv .venv_test
+          source .venv_test/bin/activate
+          pip install --quiet --upgrade pip
+          pip install --quiet -r requirements.txt
+          pytest -v
+          deactivate
+          rm -rf .venv_test
+
+  deploy:
+    needs: test
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Prod Server
+        run: |
+          echo "Разворачиваем приложение..."
+          DEPLOY_DIR="/home/luba/mortgage_app"
+          mkdir -p $DEPLOY_DIR
+          cp mortgage.py $DEPLOY_DIR/
+          cp requirements.txt $DEPLOY_DIR/
+          echo "Деплой завершён в $(date)" > $DEPLOY_DIR/last_deploy.txt
+          ls -la $DEPLOY_DIR
